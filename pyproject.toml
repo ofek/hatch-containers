@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hatch-containers"
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Ofek Lev", email = "oss@ofek.dev" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://github.com/ofek/hatch-containers#readme"
+Issues = "https://github.com/ofek/hatch-containers/issues"
+Source = "https://github.com/ofek/hatch-containers"
+
+[project.entry-points.hatch]
+containers = "hatch_containers.hooks"
+
+[tool.hatch.version]
+path = "hatch_containers/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+[tool.hatch.build.targets.wheel]
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+[tool.hatch.envs.default.scripts]
+full = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=hatch_containers --cov=tests"
+no-cov = "test --no-cov"
+
+[tool.black]
+include = '\.pyi?$'
+line-length = 120
+skip-string-normalization = true
+target-version = ['py38']
+
+[tool.isort]
+default_section = 'THIRDPARTY'
+force_grid_wrap = 0
+include_trailing_comma = true
+known_first_party = ['hatch_containers']
+line_length = 120
+multi_line_output = 3
+use_parentheses = true
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "hatch_containers/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
