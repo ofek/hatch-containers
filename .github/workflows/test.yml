@@ -18,12 +18,12 @@ env:
 
 jobs:
   run:
-    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
+    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         python-version: ['3.8', '3.9', '3.10']
 
     steps:
@@ -37,5 +37,9 @@ jobs:
     - name: Install Hatch
       run: pip install --upgrade hatch
 
+    - if: matrix.python-version == '3.9' && runner.os == 'Linux'
+      name: Lint
+      run: hatch run lint:all
+
     - name: Run tests
-      run: hatch run test
+      run: hatch run cov

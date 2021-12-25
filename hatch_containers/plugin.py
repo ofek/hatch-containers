@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021-present Ofek Lev <oss@ofek.dev>
+#
+# SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
@@ -28,7 +31,7 @@ class ContainerEnvironment(EnvironmentInterface):
 
     @staticmethod
     def get_option_types():
-        return {'image': str, 'command': list, 'start-on-creation': bool}
+        return {'image': str, 'command': list, 'start-on-creation': bool, 'shell': str}
 
     @cached_property
     def config_image(self):
@@ -57,6 +60,19 @@ class ContainerEnvironment(EnvironmentInterface):
             raise TypeError(f'Field `tool.hatch.envs.{self.name}.start-on-creation` must be a boolean')
 
         return start_on_creation
+
+    @cached_property
+    def config_shell(self):
+        shell = self.config.get('shell', '')
+        if not isinstance(shell, str):
+            raise TypeError(f'Field `tool.hatch.envs.{self.name}.shell` must be a string')
+
+        if shell:
+            return shell
+        elif 'alpine' in self.base_image:
+            return '/bin/ash'
+        else:
+            return '/bin/bash'
 
     @cached_property
     def python_version(self):
@@ -90,7 +106,7 @@ class ContainerEnvironment(EnvironmentInterface):
 
         command = ['docker', 'build', '--pull', '--tag', self.image, '--file', dockerfile, build_dir]
         if self.verbosity > 0:  # no cov
-            self.platform.check_command(command, integrate=True)
+            self.platform.check_command(command)
         else:
             self.platform.check_command_output(command)
 
@@ -129,15 +145,12 @@ class ContainerEnvironment(EnvironmentInterface):
 
     def install_project(self):
         with self:
-            self.platform.check_command(
-                self.construct_pip_install_command([self.apply_features(self.project_path)]), integrate=True
-            )
+            self.platform.check_command(self.construct_pip_install_command([self.apply_features(self.project_path)]))
 
     def install_project_dev_mode(self):
         with self:
             self.platform.check_command(
-                self.construct_pip_install_command(['--editable', self.apply_features(self.project_path)]),
-                integrate=True,
+                self.construct_pip_install_command(['--editable', self.apply_features(self.project_path)])
             )
 
     def dependencies_in_sync(self):
@@ -153,17 +166,16 @@ class ContainerEnvironment(EnvironmentInterface):
 
     def sync_dependencies(self):
         with self:
-            self.platform.check_command(self.construct_pip_install_command(self.dependencies), integrate=True)
+            self.platform.check_command(self.construct_pip_install_command(self.dependencies))
 
-    def run_shell_commands(self, commands, integrate=False):
+    def run_shell_commands(self, commands):
         with self:
             for command in self.resolve_commands(commands):
-                yield self.platform.run_command(self.format_container_command(command), shell=True, integrate=integrate)
+                yield self.platform.run_command(self.format_container_command(command), shell=True)
 
     def enter_shell(self, name, path):  # no cov
-        shell = '/bin/ash' if 'alpine' in self.base_image else '/bin/bash'
         with self:
-            process = self.platform.run_command(self.construct_container_command([shell], interactive=True))
+            process = self.platform.run_command(self.construct_container_command([self.config_shell], interactive=True))
             self.platform.exit_with_code(process.returncode)
 
     @contextmanager
@@ -174,19 +186,18 @@ class ContainerEnvironment(EnvironmentInterface):
 
             command = ['docker', 'build', '--pull', '--tag', self.builder_image, '--file', dockerfile, str(self.root)]
             if self.verbosity > 0:  # no cov
-                self.platform.check_command(command, integrate=True)
+                self.platform.check_command(command)
             else:
                 self.platform.check_command_output(command)
 
-            artifact_dir = temp_dir / 'artifacts'
-            artifact_dir.mkdir()
+            local_artifact_dir = temp_dir / 'artifacts'
+            container_artifact_dir = f'{self.project_path}/dist'
 
             # fmt: off
             command = [
                 'docker', 'create',
                 '--name', self.builder_container_name,
                 '--workdir', self.project_path,
-                '--volume', f'{artifact_dir}:{self.project_path}/dist',
             ]
             # fmt: on
 
@@ -199,16 +210,20 @@ class ContainerEnvironment(EnvironmentInterface):
             self.platform.check_command_output(command)
             try:
                 self.platform.check_command_output(['docker', 'start', self.builder_container_name])
-                self.platform.check_command(self.construct_builder_pip_install_command(dependencies), integrate=True)
+                self.platform.check_command(self.construct_builder_pip_install_command(dependencies))
 
-                data = {'local_artifact_dir': ''}
+                data = {'output_dir': ''}
                 yield data
 
-                local_artifact_dir = Path(data['local_artifact_dir'])
-                local_artifact_dir.ensure_dir_exists()
+                output_dir = Path(data['output_dir'])
+                output_dir.ensure_dir_exists()
 
-                for artifact in artifact_dir.iterdir():
-                    artifact.replace(local_artifact_dir / artifact.name)
+                self.platform.check_command_output(
+                    ['docker', 'cp', f'{self.builder_container_name}:{container_artifact_dir}', local_artifact_dir]
+                )
+
+                for artifact in local_artifact_dir.iterdir():
+                    artifact.replace(output_dir / artifact.name)
             finally:
                 self.platform.run_command(
                     ['docker', 'stop', '--time', '0', self.builder_container_name], capture_output=True
@@ -216,7 +231,7 @@ class ContainerEnvironment(EnvironmentInterface):
                 self.platform.run_command(['docker', 'rm', self.builder_container_name], capture_output=True)
 
     def get_build_process(self, build_environment, **kwargs):
-        build_environment['local_artifact_dir'] = kwargs.pop('directory', '') or str(self.root / 'dist')
+        build_environment['output_dir'] = kwargs.pop('directory', '') or str(self.root / 'dist')
 
         return self.platform.capture_process(self.construct_builder_command(self.construct_build_command(**kwargs)))
 

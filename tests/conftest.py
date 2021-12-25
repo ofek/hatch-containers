@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021-present Ofek Lev <oss@ofek.dev>
+#
+# SPDX-License-Identifier: MIT
 import os
 import sys
 from typing import Generator

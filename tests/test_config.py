@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021-present Ofek Lev <oss@ofek.dev>
+#
+# SPDX-License-Identifier: MIT
 import pytest
 from hatch.project.core import Project
 
@@ -208,3 +211,66 @@ class TestStartOnCreation:
 
         with pytest.raises(TypeError, match='Field `tool.hatch.envs.default.start-on-creation` must be a boolean'):
             _ = environment.config_start_on_creation
+
+
+class TestShell:
+    def test_not_string(self, isolation, data_dir, platform):
+        env_config = {'shell': 9000}
+        project = Project(
+            isolation,
+            config={
+                'project': {'name': 'my_app', 'version': '0.0.1'},
+                'tool': {'hatch': {'envs': {'default': env_config}}},
+            },
+        )
+        environment = ContainerEnvironment(
+            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+        )
+
+        with pytest.raises(TypeError, match='Field `tool.hatch.envs.default.shell` must be a string'):
+            _ = environment.config_shell
+
+    def test_correct(self, isolation, data_dir, platform):
+        env_config = {'shell': 'bash'}
+        project = Project(
+            isolation,
+            config={
+                'project': {'name': 'my_app', 'version': '0.0.1'},
+                'tool': {'hatch': {'envs': {'default': env_config}}},
+            },
+        )
+        environment = ContainerEnvironment(
+            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+        )
+
+        assert environment.config_shell == 'bash'
+
+    def test_default_alpine(self, isolation, data_dir, platform):
+        env_config = {'image': 'python:alpine'}
+        project = Project(
+            isolation,
+            config={
+                'project': {'name': 'my_app', 'version': '0.0.1'},
+                'tool': {'hatch': {'envs': {'default': env_config}}},
+            },
+        )
+        environment = ContainerEnvironment(
+            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+        )
+
+        assert environment.config_shell == '/bin/ash'
+
+    def test_default_other(self, isolation, data_dir, platform):
+        env_config = {}
+        project = Project(
+            isolation,
+            config={
+                'project': {'name': 'my_app', 'version': '0.0.1'},
+                'tool': {'hatch': {'envs': {'default': env_config}}},
+            },
+        )
+        environment = ContainerEnvironment(
+            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+        )
+
+        assert environment.config_shell == '/bin/bash'
