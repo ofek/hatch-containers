@@ -29,7 +29,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "hatch",
+  "hatch>=1rc5",
 ]
 dynamic = ["version"]
 

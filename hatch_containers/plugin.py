@@ -119,9 +119,7 @@ class ContainerEnvironment(EnvironmentInterface):
         ]
         # fmt: on
 
-        for env_var, value in self.get_container_env_vars().items():
-            command.extend(('--env', f'{env_var}={value}'))
-
+        self.apply_env_vars(command)
         command.append(self.image)
         command.extend(self.config_command)
 
@@ -171,7 +169,7 @@ class ContainerEnvironment(EnvironmentInterface):
     def run_shell_commands(self, commands):
         with self:
             for command in self.resolve_commands(commands):
-                yield self.platform.run_command(self.format_container_command(command), shell=True)
+                yield self.platform.run_command(self.construct_container_shell_command(command))
 
     def enter_shell(self, name, path):  # no cov
         with self:
@@ -201,9 +199,7 @@ class ContainerEnvironment(EnvironmentInterface):
             ]
             # fmt: on
 
-            for env_var, value in self.get_container_env_vars().items():
-                command.extend(('--env', f'{env_var}={value}'))
-
+            self.apply_env_vars(command)
             command.append(self.builder_image)
             command.extend(self.config_command)
 
@@ -251,13 +247,30 @@ class ContainerEnvironment(EnvironmentInterface):
             return dict(self.env_vars)
 
     def construct_container_command(self, args, interactive=False):
+        command = ['docker', 'exec']
         if interactive:  # no cov
-            return ['docker', 'exec', '-it', self.container_name, *args]
-        else:
-            return ['docker', 'exec', self.container_name, *args]
+            command.append('-it')
+
+        self.apply_env_vars(command)
+        command.append(self.container_name)
+        command.extend(args)
+        return command
 
     def construct_builder_command(self, args):
-        return ['docker', 'exec', self.builder_container_name, *args]
+        command = ['docker', 'exec']
 
-    def format_container_command(self, command):
-        return f'docker exec {self.container_name} {command}'
+        self.apply_env_vars(command)
+        command.append(self.builder_container_name)
+        command.extend(args)
+        return command
+
+    def apply_env_vars(self, command):
+        # This ensures that all commands that are executed have access to the environment variables
+        # that are currently defined at all times. Note that we create the images with the environment
+        # variables defined at that time only for debugging purposes if users for some reason enter
+        # the containers manually rather than using the `hatch shell` command.
+        for env_var, value in self.get_container_env_vars().items():
+            command.extend(('--env', f'{env_var}={value}'))
+
+    def construct_container_shell_command(self, command):
+        return self.construct_container_command(['sh', '-c', command])
