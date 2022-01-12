@@ -6,7 +6,6 @@ from __future__ import annotations
 import re
 import sys
 from contextlib import contextmanager
-from functools import cached_property
 
 from hatch.env.plugin.interface import EnvironmentInterface
 from hatch.utils.fs import Path, temp_directory
@@ -21,6 +20,12 @@ class ContainerEnvironment(EnvironmentInterface):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.__config_image = None
+        self.__config_command = None
+        self.__config_start_on_creation = None
+        self.__config_shell = None
+        self.__python_version = None
+
         self.base_image = self.config_image.format(version=self.python_version)
         self.base_image_id = re.sub(r'[^\w.-]', '_', self.base_image)
         self.image = f'{self.base_image.replace(":", "_")}:hatch-container'
@@ -33,56 +38,72 @@ class ContainerEnvironment(EnvironmentInterface):
     def get_option_types():
         return {'image': str, 'command': list, 'start-on-creation': bool, 'shell': str}
 
-    @cached_property
+    @property
     def config_image(self):
-        image = self.config.get('image', '')
-        if not isinstance(image, str):
-            raise TypeError(f'Field `tool.hatch.envs.{self.name}.image` must be a string')
+        if self.__config_image is None:
+            image = self.config.get('image', 'python:{version}')
+            if not isinstance(image, str):
+                raise TypeError(f'Field `tool.hatch.envs.{self.name}.image` must be a string')
 
-        return image or 'python:{version}'
+            self.__config_image = image
 
-    @cached_property
+        return self.__config_image
+
+    @property
     def config_command(self):
-        command = self.config.get('command', [])
-        if not isinstance(command, list):
-            raise TypeError(f'Field `tool.hatch.envs.{self.name}.command` must be an array')
+        if self.__config_command is None:
+            command = self.config.get('command', ['/bin/sleep', 'infinity'])
+            if not isinstance(command, list):
+                raise TypeError(f'Field `tool.hatch.envs.{self.name}.command` must be an array')
 
-        for i, arg in enumerate(command, 1):
-            if not isinstance(arg, str):
-                raise TypeError(f'Argument #{i} of field `tool.hatch.envs.{self.name}.command` must be a string')
+            for i, arg in enumerate(command, 1):
+                if not isinstance(arg, str):
+                    raise TypeError(f'Argument #{i} of field `tool.hatch.envs.{self.name}.command` must be a string')
 
-        return command or ['/bin/sleep', 'infinity']
+            self.__config_command = command
 
-    @cached_property
+        return self.__config_command
+
+    @property
     def config_start_on_creation(self):
-        start_on_creation = self.config.get('start-on-creation', False)
-        if not isinstance(start_on_creation, bool):
-            raise TypeError(f'Field `tool.hatch.envs.{self.name}.start-on-creation` must be a boolean')
+        if self.__config_start_on_creation is None:
+            start_on_creation = self.config.get('start-on-creation', False)
+            if not isinstance(start_on_creation, bool):
+                raise TypeError(f'Field `tool.hatch.envs.{self.name}.start-on-creation` must be a boolean')
 
-        return start_on_creation
+            self.__config_start_on_creation = start_on_creation
 
-    @cached_property
+        return self.__config_start_on_creation
+
+    @property
     def config_shell(self):
-        shell = self.config.get('shell', '')
-        if not isinstance(shell, str):
-            raise TypeError(f'Field `tool.hatch.envs.{self.name}.shell` must be a string')
+        if self.__config_shell is None:
+            shell = self.config.get('shell', '')
+            if not isinstance(shell, str):
+                raise TypeError(f'Field `tool.hatch.envs.{self.name}.shell` must be a string')
 
-        if shell:
-            return shell
-        elif 'alpine' in self.base_image:
-            return '/bin/ash'
-        else:
-            return '/bin/bash'
+            if not shell:
+                if 'alpine' in self.base_image:
+                    shell = '/bin/ash'
+                else:
+                    shell = '/bin/bash'
 
-    @cached_property
+            self.__config_shell = shell
+
+        return self.__config_shell
+
+    @property
     def python_version(self):
-        if python_version := self.config.get('python', ''):
-            if python_version.isdigit() and len(python_version) > 1:
+        if self.__python_version is None:
+            python_version = self.config.get('python', '')
+            if not python_version:
+                python_version = '.'.join(map(str, sys.version_info[:2]))
+            elif python_version.isdigit() and len(python_version) > 1:
                 python_version = f'{python_version[0]}.{python_version[1:]}'
 
-            return python_version
-        else:
-            return '.'.join(map(str, sys.version_info[:2]))
+            self.__python_version = python_version
+
+        return self.__python_version
 
     def _activate(self):
         self.platform.check_command_output(['docker', 'start', self.container_name])
