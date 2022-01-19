@@ -30,12 +30,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "hatch>=1.0.0rc8",
+  "hatch>=1.0.0rc10",
 ]
 dynamic = ["version"]
 
 [project.urls]
-Donate = "https://github.com/sponsors/ofek"
+Funding = "https://github.com/sponsors/ofek"
 History = "https://github.com/ofek/hatch-containers/blob/master/HISTORY.md"
 Issues = "https://github.com/ofek/hatch-containers/issues"
 Source = "https://github.com/ofek/hatch-containers"
