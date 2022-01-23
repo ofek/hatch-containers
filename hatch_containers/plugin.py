@@ -119,6 +119,9 @@ class ContainerEnvironment(EnvironmentInterface):
         if not self.config_start_on_creation:
             self._deactivate()
 
+    def find(self):
+        return self.container_name
+
     def create(self):
         build_dir = self.data_directory / 'dockerfiles' / self.base_image_id
         dockerfile = build_dir / 'Dockerfile'
