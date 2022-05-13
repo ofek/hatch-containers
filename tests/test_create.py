@@ -61,10 +61,7 @@ def test_start_on_creation(hatch, container_project, default_container_name, pro
     output = check_container_output(default_container_name, ['python', '-m', 'pip', 'freeze'])
     lines = output.strip().splitlines()
 
-    assert len(lines) == 3
-    lines.remove(f'# Editable install with no version control ({project_name}==0.0.1)')
-    lines.remove('-e /home/project')
-    assert lines[0].startswith('editables==')
+    assert lines == [f'# Editable install with no version control ({project_name}==0.0.1)', '-e /home/project']
 
 
 def test_no_dev_mode(hatch, container_project, default_container_name, project_name):
