@@ -30,7 +30,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "hatch>=1.0.0rc11",
+  "hatch>=1.1.1",
 ]
 dynamic = ["version"]
 
@@ -46,9 +46,14 @@ containers = "hatch_containers.hooks"
 [tool.hatch.version]
 path = "hatch_containers/__about__.py"
 
-[tool.hatch.build.targets.sdist]
-[tool.hatch.build.targets.wheel]
-packages = ["hatch_containers"]
+[tool.mypy]
+disallow_untyped_defs = false
+follow_imports = "normal"
+ignore_missing_imports = true
+pretty = true
+show_column_numbers = true
+warn_no_return = false
+warn_unused_ignores = true
 
 [tool.black]
 include = '\.pyi?$'

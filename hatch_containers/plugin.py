@@ -190,10 +190,13 @@ class ContainerEnvironment(EnvironmentInterface):
         with self:
             self.platform.check_command(self.construct_pip_install_command(self.dependencies))
 
-    def run_shell_commands(self, commands):
+    @contextmanager
+    def command_context(self):
         with self:
-            for command in self.resolve_commands(commands):
-                yield self.platform.run_command(self.construct_container_shell_command(command))
+            yield
+
+    def run_shell_command(self, command):
+        return self.platform.run_command(self.construct_container_shell_command(command))
 
     def enter_shell(self, name, path):  # no cov
         with self:
@@ -254,9 +257,6 @@ class ContainerEnvironment(EnvironmentInterface):
         build_environment['output_dir'] = kwargs.pop('directory', '') or str(self.root / 'dist')
 
         return self.platform.capture_process(self.construct_builder_command(self.construct_build_command(**kwargs)))
-
-    def finalize_command(self, command):
-        return command
 
     def construct_pip_install_command(self, *args, **kwargs):
         return self.construct_container_command(super().construct_pip_install_command(*args, **kwargs))
