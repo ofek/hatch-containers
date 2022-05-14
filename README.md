@@ -8,7 +8,7 @@
 
 -----
 
-This provides a plugin for [Hatch](https://github.com/ofek/hatch) that allows the use of containerized [environments](https://ofek.dev/hatch/latest/environment/).
+This provides a plugin for [Hatch](https://github.com/ofek/hatch) that allows the use of containerized [environments](https://hatch.pypa.io/latest/environment/).
 
 **Table of Contents**
 
@@ -31,7 +31,7 @@ pip install hatch-containers
 
 ## Configuration
 
-The [environment plugin](https://ofek.dev/hatch/latest/plugins/environment/) name is `container`.
+The [environment plugin](https://hatch.pypa.io/latest/plugins/environment/) name is `container`.
 
 - ***pyproject.toml***
 
@@ -49,7 +49,7 @@ The [environment plugin](https://ofek.dev/hatch/latest/plugins/environment/) nam
 
 ### Python
 
-If the [Python version](https://ofek.dev/hatch/latest/config/environment/#python-version) is set to a multi-character integer like `310` then it will be interpreted as its `<MAJOR>.<MINOR>` form e.g. `3.10`.
+If the [Python version](https://hatch.pypa.io/latest/config/environment/#python-version) is set to a multi-character integer like `310` then it will be interpreted as its `<MAJOR>.<MINOR>` form e.g. `3.10`.
 
 If not set, then the `<MAJOR>.<MINOR>` version of the first `python` found along your `PATH` will be used, defaulting to the Python executable Hatch is running on.
 
@@ -77,7 +77,7 @@ command = ["/bin/sleep", "infinity"]
 
 ### Startup
 
-By default, containers will be started automatically when [entered](https://ofek.dev/hatch/latest/environment/#entering-environments) or when [running commands](https://ofek.dev/hatch/latest/environment/#command-execution) and will be stopped immediately after. If you want containers to start automatically upon [creation](https://ofek.dev/hatch/latest/environment/#creation) and not be stopped until [removal](https://ofek.dev/hatch/latest/environment/#removal), you can set `start-on-creation` to `true`.
+By default, containers will be started automatically when [entered](https://hatch.pypa.io/latest/environment/#entering-environments) or when [running commands](https://hatch.pypa.io/latest/environment/#command-execution) and will be stopped immediately after. If you want containers to start automatically upon [creation](https://hatch.pypa.io/latest/environment/#creation) and not be stopped until [removal](https://hatch.pypa.io/latest/environment/#removal), you can set `start-on-creation` to `true`.
 
 Default:
 
@@ -88,12 +88,12 @@ start-on-creation = false
 
 ### Shell
 
-The `shell` option specifies the executable that will be used when [entering](https://ofek.dev/hatch/latest/environment/#entering-environments) containers. By default, this is set to `/bin/bash` unless `alpine` is in the [image](#image) name, in which case `/bin/ash` will be used instead.
+The `shell` option specifies the executable that will be used when [entering](https://hatch.pypa.io/latest/environment/#entering-environments) containers. By default, this is set to `/bin/bash` unless `alpine` is in the [image](#image) name, in which case `/bin/ash` will be used instead.
 
 ## Notes
 
 - There must be a `docker` executable along your `PATH`.
-- The `env-exclude` [environment variable filter](https://ofek.dev/hatch/latest/config/environment/#filters) has no effect.
+- The `env-exclude` [environment variable filter](https://hatch.pypa.io/latest/config/environment/#filters) has no effect.
 
 ## Future
 
