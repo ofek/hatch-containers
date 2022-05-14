@@ -8,7 +8,7 @@
 
 -----
 
-This provides a plugin for [Hatch](https://github.com/ofek/hatch) that allows the use of containerized [environments](https://hatch.pypa.io/latest/environment/).
+This provides a plugin for [Hatch](https://github.com/pypa/hatch) that allows the use of containerized [environments](https://hatch.pypa.io/latest/environment/).
 
 **Table of Contents**
 
