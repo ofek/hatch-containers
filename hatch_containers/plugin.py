@@ -198,7 +198,7 @@ class ContainerEnvironment(EnvironmentInterface):
     def run_shell_command(self, command):
         return self.platform.run_command(self.construct_container_shell_command(command))
 
-    def enter_shell(self, name, path):  # no cov
+    def enter_shell(self, name, path, args):  # no cov
         with self:
             process = self.platform.run_command(self.construct_container_command([self.config_shell], interactive=True))
             self.platform.exit_with_code(process.returncode)

@@ -18,7 +18,7 @@ class TestImage:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_image == 'python:{version}'
@@ -33,7 +33,7 @@ class TestImage:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_image == 'python:{version}-alpine'
@@ -50,7 +50,7 @@ class TestImage:
 
         with pytest.raises(TypeError, match='Field `tool.hatch.envs.default.image` must be a string'):
             _ = ContainerEnvironment(
-                isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+                isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
             )
 
 
@@ -65,7 +65,7 @@ class TestCommand:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_command == ['/bin/sleep', 'infinity']
@@ -80,7 +80,7 @@ class TestCommand:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_command == ['/bin/sleep', '9000']
@@ -95,7 +95,7 @@ class TestCommand:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         with pytest.raises(TypeError, match='Field `tool.hatch.envs.default.command` must be an array'):
@@ -111,7 +111,7 @@ class TestCommand:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         with pytest.raises(TypeError, match='Argument #1 of field `tool.hatch.envs.default.command` must be a string'):
@@ -129,7 +129,7 @@ class TestPythonVersion:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.python_version == default_python_version
@@ -144,7 +144,7 @@ class TestPythonVersion:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.python_version == '3.10'
@@ -159,7 +159,7 @@ class TestPythonVersion:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.python_version == '3.10'
@@ -176,7 +176,7 @@ class TestStartOnCreation:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_start_on_creation is False
@@ -191,7 +191,7 @@ class TestStartOnCreation:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_start_on_creation is True
@@ -206,7 +206,7 @@ class TestStartOnCreation:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         with pytest.raises(TypeError, match='Field `tool.hatch.envs.default.start-on-creation` must be a boolean'):
@@ -224,7 +224,7 @@ class TestShell:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         with pytest.raises(TypeError, match='Field `tool.hatch.envs.default.shell` must be a string'):
@@ -240,7 +240,7 @@ class TestShell:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_shell == 'bash'
@@ -255,7 +255,7 @@ class TestShell:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_shell == '/bin/ash'
@@ -270,7 +270,7 @@ class TestShell:
             },
         )
         environment = ContainerEnvironment(
-            isolation, project.metadata, 'default', project.config.envs['default'], data_dir, platform, 0
+            isolation, project.metadata, 'default', project.config.envs['default'], {}, data_dir, platform, 0
         )
 
         assert environment.config_shell == '/bin/bash'
