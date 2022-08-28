@@ -4,7 +4,7 @@
 import pytest
 from hatch.project.core import Project
 
-from .utils import container_exists, container_running, update_project_environment
+from .utils import container_exists, container_running, dedent, update_project_environment
 
 pytestmark = [pytest.mark.usefixtures('container_cleanup')]
 
@@ -20,7 +20,11 @@ def test_not_running(hatch, container_project, default_container_name):
         result = hatch('env', 'remove')
 
     assert result.exit_code == 0, result.output
-    assert not result.output
+    assert result.output == dedent(
+        """
+        Removing environment: default
+        """
+    )
     assert not container_exists(default_container_name)
 
 
@@ -38,5 +42,9 @@ def test_running(hatch, container_project, default_container_name):
         result = hatch('env', 'remove')
 
     assert result.exit_code == 0, result.output
-    assert not result.output
+    assert result.output == dedent(
+        """
+        Removing environment: default
+        """
+    )
     assert not container_exists(default_container_name)
