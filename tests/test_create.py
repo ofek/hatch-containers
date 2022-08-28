@@ -20,6 +20,7 @@ def test_basic(hatch, container_project, default_container_name):
         """
         Creating environment: default
         Installing project in development mode
+        Checking dependencies
         """
     )
     assert container_exists(default_container_name) and not container_running(default_container_name)
@@ -54,6 +55,7 @@ def test_start_on_creation(hatch, container_project, default_container_name, pro
         """
         Creating environment: default
         Installing project in development mode
+        Checking dependencies
         """
     )
     assert container_running(default_container_name)
@@ -78,6 +80,7 @@ def test_no_dev_mode(hatch, container_project, default_container_name, project_n
         """
         Creating environment: default
         Installing project
+        Checking dependencies
         """
     )
     assert container_running(default_container_name)
@@ -105,6 +108,7 @@ def test_dependencies(hatch, container_project, default_container_name, project_
         """
         Creating environment: default
         Installing project
+        Checking dependencies
         Syncing dependencies
         """
     )

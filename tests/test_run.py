@@ -29,6 +29,7 @@ def test_env_vars(hatch, container_project, default_container_name):
         """
         Creating environment: default
         Installing project in development mode
+        Checking dependencies
         """
     )
     assert container_running(default_container_name)
@@ -62,6 +63,7 @@ def test_env_vars_with_include(hatch, container_project, default_container_name)
         """
         Creating environment: default
         Installing project in development mode
+        Checking dependencies
         """
     )
     assert container_running(default_container_name)
@@ -95,6 +97,7 @@ def test_env_vars_current(hatch, container_project, default_container_name):
         """
         Creating environment: default
         Installing project in development mode
+        Checking dependencies
         """
     )
     assert container_running(default_container_name)
