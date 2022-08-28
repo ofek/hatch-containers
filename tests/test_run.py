@@ -113,6 +113,10 @@ def test_env_vars_current(hatch, container_project, default_container_name):
         )
 
     assert result.exit_code == 0, result.output
-    assert not result.output
+    assert result.output == dedent(
+        """
+        Checking dependencies
+        """
+    )
     assert container_running(default_container_name)
     assert check_container_output(default_container_name, ['cat', '/tmp/test.txt']).strip() == 'BAR|FOO'
