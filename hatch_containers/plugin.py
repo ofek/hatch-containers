@@ -11,7 +11,7 @@ from hatch.env.plugin.interface import EnvironmentInterface
 from hatch.utils.fs import Path, temp_directory
 from hatch.utils.structures import EnvVars
 
-from .dockerfile import construct_dockerfile
+from hatch_containers.dockerfile import construct_dockerfile
 
 
 class ContainerEnvironment(EnvironmentInterface):
@@ -270,7 +270,7 @@ class ContainerEnvironment(EnvironmentInterface):
         else:
             return dict(self.env_vars)
 
-    def construct_container_command(self, args, interactive=False):
+    def construct_container_command(self, args, *, interactive=False):
         command = ['docker', 'exec']
         if interactive:  # no cov
             command.append('-it')
