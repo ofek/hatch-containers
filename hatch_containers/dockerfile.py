@@ -26,7 +26,7 @@ COPY . /home/project
 """
 
 
-def construct_dockerfile(base_image: str, builder=False):
+def construct_dockerfile(base_image: str, *, builder=False):
     if builder:
         return LINUX_TEMPLATE_BUILDER.format(base_image=base_image)
     else:

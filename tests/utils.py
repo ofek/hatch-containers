@@ -38,7 +38,7 @@ def container_running(container_name):
 
 def update_project_environment(project, name, config):
     project_file = project.root / 'pyproject.toml'
-    with open(str(project_file), 'r', encoding='utf-8') as f:
+    with open(str(project_file), encoding='utf-8') as f:
         raw_config = tomli.loads(f.read())
 
     env_config = raw_config.setdefault('tool', {}).setdefault('hatch', {}).setdefault('envs', {}).setdefault(name, {})

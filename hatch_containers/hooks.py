@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 from hatchling.plugin import hookimpl
 
-from .plugin import ContainerEnvironment
+from hatch_containers.plugin import ContainerEnvironment
 
 
 @hookimpl
