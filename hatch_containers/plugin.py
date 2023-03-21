@@ -268,7 +268,7 @@ class ContainerEnvironment(EnvironmentInterface):
                 )
 
                 for artifact in local_artifact_dir.iterdir():
-                    artifact.replace(output_dir / artifact.name)
+                    shutil.move(artifact, output_dir / artifact.name)
             finally:
                 self.platform.run_command(
                     ['docker', 'stop', '--time', '0', self.builder_container_name], capture_output=True
