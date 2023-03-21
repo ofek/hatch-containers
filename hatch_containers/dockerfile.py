@@ -3,26 +3,42 @@
 # SPDX-License-Identifier: MIT
 LINUX_TEMPLATE_ENVIRONMENT = """\
 FROM {base_image}
+ARG USER_UID
+ARG USER_GID
 
-RUN python -m pip install --disable-pip-version-check --upgrade virtualenv hatchling \
- && python -m virtualenv /home/venv --no-download --no-periodic-update --pip embed
+RUN set -eux; \
+    addgroup --gid $USER_GID user; \
+    adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user
 
-ENV VIRTUAL_ENV="/home/venv" PATH="/home/venv/bin:$PATH"
+USER $USER_UID:$USER_GID
+RUN set -eux; \
+    python -m pip install --disable-pip-version-check --upgrade virtualenv hatchling; \
+    python -m virtualenv /home/user/venv --no-download --no-periodic-update --pip embed
+
+ENV VIRTUAL_ENV="/home/user/venv" PATH="/home/user/venv/bin:$PATH"
 
 WORKDIR /home/project
 """
 
 LINUX_TEMPLATE_BUILDER = """\
 FROM {base_image}
+ARG USER_UID
+ARG USER_GID
 
-RUN python -m pip install --disable-pip-version-check --upgrade virtualenv \
- && python -m virtualenv /home/venv --no-download --no-periodic-update --pip embed
+RUN set -eux; \
+    addgroup --gid $USER_GID user; \
+    adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user
 
-ENV VIRTUAL_ENV="/home/venv" PATH="/home/venv/bin:$PATH"
+USER $USER_UID:$USER_GID
+RUN set -eux; \
+    python -m pip install --disable-pip-version-check --upgrade virtualenv hatchling; \
+    python -m virtualenv /home/user/venv --no-download --no-periodic-update --pip embed
+
+ENV VIRTUAL_ENV="/home/user/venv" PATH="/home/user/venv/bin:$PATH"
 
 WORKDIR /home/project
 
-COPY . /home/project
+COPY --chown=$USER_UID:$USER_GID . /home/project
 """
 
 

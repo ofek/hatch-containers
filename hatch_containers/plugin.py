@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import os
 import re
 import sys
 from contextlib import contextmanager
@@ -26,11 +27,14 @@ class ContainerEnvironment(EnvironmentInterface):
         self.__config_shell = None
         self.__python_version = None
 
+        self.uid = os.getuid()
+        self.gid = os.getgid()
         self.base_image = self.config_image.format(version=self.python_version)
         self.base_image_id = re.sub(r'[^\w.-]', '_', self.base_image)
-        self.image = f'{self.base_image.replace(":", "_")}:hatch-container'
+        self.image_name = f'{self.base_image.replace(":", "_")}_{self.uid}_{self.gid}'
+        self.image = f'{self.image_name}:hatch-container'
         self.builder_image = f'{self.image}_builder'
-        self.container_name = f'{self.metadata.core.name}_{self.name}'
+        self.container_name = f'{self.metadata.core.name}_{self.name}_{self.image_name}'
         self.builder_container_name = f'{self.container_name}_builder'
         self.project_path = '/home/project'
 
@@ -128,7 +132,16 @@ class ContainerEnvironment(EnvironmentInterface):
         build_dir.ensure_dir_exists()
         dockerfile.write_text(construct_dockerfile(self.base_image))
 
-        command = ['docker', 'build', '--pull', '--tag', self.image, '--file', dockerfile, build_dir]
+        # fmt: off
+        command = [
+            'docker', 'build', '--pull',
+            '--tag', self.image,
+            '--file', dockerfile,
+            '--build-arg', f'USER_UID={self.uid}',
+            '--build-arg', f'USER_GID={self.gid}',
+            build_dir,
+        ]
+        # fmt: on
         if self.verbosity > 0:  # no cov
             self.platform.check_command(command)
         else:
@@ -209,7 +222,16 @@ class ContainerEnvironment(EnvironmentInterface):
             dockerfile = temp_dir / 'Dockerfile'
             dockerfile.write_text(construct_dockerfile(self.base_image, builder=True))
 
-            command = ['docker', 'build', '--pull', '--tag', self.builder_image, '--file', dockerfile, str(self.root)]
+            # fmt: off
+            command = [
+                'docker', 'build', '--pull',
+                '--tag', self.builder_image,
+                '--file', dockerfile,
+                '--build-arg', f'USER_UID={self.uid}',
+                '--build-arg', f'USER_GID={self.gid}',
+                str(self.root),
+            ]
+            # fmt: on
             if self.verbosity > 0:  # no cov
                 self.platform.check_command(command)
             else:
