@@ -12,7 +12,8 @@ RUN set -eux; \
     fi; \
     if ! getent passwd $USER_UID >/dev/null 2>&1; then \
         adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user; \
-    fi
+    fi; \
+    install -d -o $USER_UID -g $USER_GID -m 0755 /home/project
 
 USER $USER_UID:$USER_GID
 RUN set -eux; \
@@ -35,7 +36,8 @@ RUN set -eux; \
     fi; \
     if ! getent passwd $USER_UID >/dev/null 2>&1; then \
         adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user; \
-    fi
+    fi; \
+    install -d -o $USER_UID -g $USER_GID -m 0755 /home/project
 
 USER $USER_UID:$USER_GID
 RUN set -eux; \
