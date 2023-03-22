@@ -103,8 +103,8 @@ def default_python_version():
 
 
 @pytest.fixture(scope='session')
-def default_container_name(project_name):
-    return f'{project_name}_default'
+def default_container_name(project_name, default_python_version):
+    return f'{project_name}_default_python_{default_python_version}-slim_{os.getuid()}_{os.getgid()}'
 
 
 @pytest.fixture(scope='session')

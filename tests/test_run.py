@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2021-present Ofek Lev <oss@ofek.dev>
 #
 # SPDX-License-Identifier: MIT
+from tempfile import NamedTemporaryFile
+
 import pytest
 from hatch.project.core import Project
 
@@ -15,25 +17,26 @@ def test_env_vars(hatch, container_project, default_container_name):
         project, 'default', {'start-on-creation': True, 'env-vars': {'FOO': 'BAR'}, **project.config.envs['default']}
     )
 
-    with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'BAZ'}):
-        result = hatch(
-            'run',
-            'python',
-            '-c',
-            "import pathlib,os;pathlib.Path('/tmp/test.txt').write_text("
-            "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
-        )
+    with NamedTemporaryFile() as temp_file:
+        with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'BAZ'}):
+            result = hatch(
+                'run',
+                'python',
+                '-c',
+                f"import pathlib,os;pathlib.Path('{temp_file.name}').write_text("
+                "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
+            )
 
-    assert result.exit_code == 0, result.output
-    assert result.output == dedent(
-        """
-        Creating environment: default
-        Installing project in development mode
-        Checking dependencies
-        """
-    )
-    assert container_running(default_container_name)
-    assert check_container_output(default_container_name, ['cat', '/tmp/test.txt']).strip() == 'BAR|'
+        assert result.exit_code == 0, result.output
+        assert result.output == dedent(
+            """
+            Creating environment: default
+            Installing project in development mode
+            Checking dependencies
+            """
+        )
+        assert container_running(default_container_name)
+        assert check_container_output(default_container_name, ['cat', temp_file.name]).strip() == 'BAR|'
 
 
 def test_env_vars_with_include(hatch, container_project, default_container_name):
@@ -49,25 +52,26 @@ def test_env_vars_with_include(hatch, container_project, default_container_name)
         },
     )
 
-    with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'BAZ'}):
-        result = hatch(
-            'run',
-            'python',
-            '-c',
-            "import pathlib,os;pathlib.Path('/tmp/test.txt').write_text("
-            "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
-        )
+    with NamedTemporaryFile() as temp_file:
+        with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'BAZ'}):
+            result = hatch(
+                'run',
+                'python',
+                '-c',
+                f"import pathlib,os;pathlib.Path('{temp_file.name}').write_text("
+                "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
+            )
 
-    assert result.exit_code == 0, result.output
-    assert result.output == dedent(
-        """
-        Creating environment: default
-        Installing project in development mode
-        Checking dependencies
-        """
-    )
-    assert container_running(default_container_name)
-    assert check_container_output(default_container_name, ['cat', '/tmp/test.txt']).strip() == 'BAR|BAZ'
+        assert result.exit_code == 0, result.output
+        assert result.output == dedent(
+            """
+            Creating environment: default
+            Installing project in development mode
+            Checking dependencies
+            """
+        )
+        assert container_running(default_container_name)
+        assert check_container_output(default_container_name, ['cat', temp_file.name]).strip() == 'BAR|BAZ'
 
 
 def test_env_vars_current(hatch, container_project, default_container_name):
@@ -83,40 +87,41 @@ def test_env_vars_current(hatch, container_project, default_container_name):
         },
     )
 
-    with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'BAZ'}):
-        result = hatch(
-            'run',
-            'python',
-            '-c',
-            "import pathlib,os;pathlib.Path('/tmp/test.txt').write_text("
-            "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
+    with NamedTemporaryFile() as temp_file:
+        with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'BAZ'}):
+            result = hatch(
+                'run',
+                'python',
+                '-c',
+                f"import pathlib,os;pathlib.Path('{temp_file.name}').write_text("
+                "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
+            )
+
+        assert result.exit_code == 0, result.output
+        assert result.output == dedent(
+            """
+            Creating environment: default
+            Installing project in development mode
+            Checking dependencies
+            """
         )
+        assert container_running(default_container_name)
+        assert check_container_output(default_container_name, ['cat', temp_file.name]).strip() == 'BAR|BAZ'
 
-    assert result.exit_code == 0, result.output
-    assert result.output == dedent(
-        """
-        Creating environment: default
-        Installing project in development mode
-        Checking dependencies
-        """
-    )
-    assert container_running(default_container_name)
-    assert check_container_output(default_container_name, ['cat', '/tmp/test.txt']).strip() == 'BAR|BAZ'
+        with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'FOO'}):
+            result = hatch(
+                'run',
+                'python',
+                '-c',
+                f"import pathlib,os;pathlib.Path('{temp_file.name}').write_text("
+                "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
+            )
 
-    with container_project.as_cwd({'FOO': 'BAZ', 'BAR': 'FOO'}):
-        result = hatch(
-            'run',
-            'python',
-            '-c',
-            "import pathlib,os;pathlib.Path('/tmp/test.txt').write_text("
-            "os.environ.get('FOO','')+'|'+os.environ.get('BAR',''))",
+        assert result.exit_code == 0, result.output
+        assert result.output == dedent(
+            """
+            Checking dependencies
+            """
         )
-
-    assert result.exit_code == 0, result.output
-    assert result.output == dedent(
-        """
-        Checking dependencies
-        """
-    )
-    assert container_running(default_container_name)
-    assert check_container_output(default_container_name, ['cat', '/tmp/test.txt']).strip() == 'BAR|FOO'
+        assert container_running(default_container_name)
+        assert check_container_output(default_container_name, ['cat', temp_file.name]).strip() == 'BAR|FOO'
