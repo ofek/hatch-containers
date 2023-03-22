@@ -154,6 +154,7 @@ class ContainerEnvironment(EnvironmentInterface):
             '--name', self.container_name,
             '--workdir', self.project_path,
             '--volume', f'{self.root}:{self.project_path}',
+            '--user', f'{self.uid}:{self.gid}',
         ]
         # fmt: on
 
@@ -246,6 +247,7 @@ class ContainerEnvironment(EnvironmentInterface):
                 'docker', 'create',
                 '--name', self.builder_container_name,
                 '--workdir', self.project_path,
+                '--user', f'{self.uid}:{self.gid}',
             ]
             # fmt: on
 
@@ -294,7 +296,7 @@ class ContainerEnvironment(EnvironmentInterface):
             return dict(self.env_vars)
 
     def construct_container_command(self, args, *, interactive=False):
-        command = ['docker', 'exec']
+        command = ['docker', 'exec', '--user', f'{self.uid}:{self.gid}']
         if interactive:  # no cov
             command.append('-it')
 
@@ -304,7 +306,7 @@ class ContainerEnvironment(EnvironmentInterface):
         return command
 
     def construct_builder_command(self, args):
-        command = ['docker', 'exec']
+        command = ['docker', 'exec', '--user', f'{self.uid}:{self.gid}']
 
         self.apply_env_vars(command)
         command.append(self.builder_container_name)
