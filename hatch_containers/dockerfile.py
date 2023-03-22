@@ -7,8 +7,12 @@ ARG USER_UID
 ARG USER_GID
 
 RUN set -eux; \
-    addgroup --gid $USER_GID user; \
-    adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user
+    if ! getent group $USER_GID >/dev/null 2>&1; then \
+        addgroup --gid $USER_GID user; \
+    fi; \
+    if ! getent passwd $USER_UID >/dev/null 2>&1; then \
+        adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user; \
+    fi
 
 USER $USER_UID:$USER_GID
 RUN set -eux; \
@@ -26,8 +30,12 @@ ARG USER_UID
 ARG USER_GID
 
 RUN set -eux; \
-    addgroup --gid $USER_GID user; \
-    adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user
+    if ! getent group $USER_GID >/dev/null 2>&1; then \
+        addgroup --gid $USER_GID user; \
+    fi; \
+    if ! getent passwd $USER_UID >/dev/null 2>&1; then \
+        adduser --disabled-password --gecos "" --home /home/user --ingroup user --uid "$USER_UID" user; \
+    fi
 
 USER $USER_UID:$USER_GID
 RUN set -eux; \
